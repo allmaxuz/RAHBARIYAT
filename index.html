@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>ALLMAX · Rahbariyat</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--y:#4FBF5E;--q:#151515;--q2:#1d1d1d;--q3:#262626;--k:#8a8a8a;--r:#ff6b6b;--s:#ffcc4d;--b:#2AABEE}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:Inter,-apple-system,Segoe UI,Roboto,sans-serif;background:#0d0d0d;color:#fff;font-size:14px}
+.top{position:sticky;top:0;z-index:5;background:rgba(13,13,13,.92);backdrop-filter:blur(8px);padding:12px 14px 8px;display:flex;align-items:center;gap:10px}
+.lg{width:34px;height:34px;border-radius:10px;background:var(--y);display:flex;align-items:center;justify-content:center;color:var(--q);font-weight:900;font-size:20px;flex:none}
+.top b{font-size:16px;display:block}.top small{color:var(--k);font-size:11px}
+.top button{margin-left:auto;background:var(--q3);border:0;color:#fff;border-radius:10px;padding:7px 11px;font-size:13px}
+main{padding:0 12px 40px}
+.chips{display:flex;gap:6px;padding:6px 0}
+.chip{flex:1;padding:9px 13px;border-radius:20px;background:var(--q3);color:#ddd;font-size:13px;border:0;font-weight:600}
+.chip.on{background:var(--y);color:var(--q);font-weight:800}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.k{background:linear-gradient(145deg,rgba(79,191,94,.20),#1b1b1b 70%);border:1px solid rgba(79,191,94,.40);border-radius:16px;padding:11px 12px}
+.g2 .k:nth-child(4n+2){background:linear-gradient(145deg,rgba(42,171,238,.20),#1b1b1b 70%);border-color:rgba(42,171,238,.40)}
+.g2 .k:nth-child(4n+3){background:linear-gradient(145deg,rgba(255,204,77,.18),#1b1b1b 70%);border-color:rgba(255,204,77,.38)}
+.g2 .k:nth-child(4n+4){background:linear-gradient(145deg,rgba(232,121,249,.18),#1b1b1b 70%);border-color:rgba(232,121,249,.38)}
+.k small{display:block;color:var(--k);font-size:11px}.k b{font-size:21px;letter-spacing:-.5px;display:block;margin:2px 0;word-break:break-word}.k i{font-style:normal;font-size:11px;color:#bbb;display:block}
+.up{color:var(--y)!important}.dn{color:var(--r)!important}
+.kt{background:linear-gradient(160deg,rgba(79,191,94,.10),#1d1d1d 55%);border:1px solid rgba(79,191,94,.28);border-left:3px solid var(--y);border-radius:16px;padding:12px;margin:8px 0}
+.kt h4{margin:0 0 8px;font-size:14px}
+.kt p{margin:6px 0;line-height:1.45;color:#ddd;font-size:13.5px}
+.kt p b{color:#fff}
+.kt.ogoh{border-left-color:var(--s);background:linear-gradient(160deg,rgba(255,204,77,.12),#1d1d1d 55%);border-color:rgba(255,204,77,.35)}
+.kt.ogoh li{margin:6px 0;line-height:1.4}.kt ol{margin:0;padding-left:20px}
+.yuk{text-align:center;color:var(--k);padding:40px}
+.xato{background:#3a1515;border:1px solid #702828;color:#ffb3b3;border-radius:12px;padding:12px;margin:12px 0}
+.kichik{color:var(--k);font-size:11px;text-align:center;margin:10px 0}
+</style></head><body>
+<div class="top"><div class="lg">«</div><div><b>Rahbariyat</b><small id="sub">ALLMAX FIX PRICE</small></div><button id="yan">🔄</button></div>
+<main><div class="chips"><button class="chip on" data-d="kecha">📊 Kecha</button><button class="chip" data-d="hafta">📈 Hafta</button></div><div id="E"><div class="yuk">⏳ Yuklanmoqda…</div></div></main>
+<script>
+const W = window.Telegram && Telegram.WebApp; try { W && (W.ready(), W.expand()); } catch (e) {}
+const E = document.getElementById('E');
+const API_URL = (() => { const q = new URLSearchParams(location.search); let u = q.get('api') || ''; try { if (u) localStorage.setItem('rb_api', u); else u = localStorage.getItem('rb_api') || ''; } catch (e) {} return u; })();
+const INIT = (W && W.initData) || '';
+let DAVR = 'kecha';
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function xavf(s) { return esc(String(s).replace(/<\/?b>/g, '\u0001').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')).replace(/\u0001([^\u0001]*)\u0001/g, '<b>$1</b>').replace(/\u0001/g, ''); }   // server faqat <b> yuboradi; boshqasi ko'rinmaydi
+function dcl(d) { return /▲/.test(d) ? 'up' : /▼/.test(d) ? 'dn' : ''; }
+function api(metod, a) {
+  if (!API_URL) return Promise.reject(new Error("Ulanish manzili yo'q. Ilovani bot ichidagi «📱 Ilovani ochish» tugmasidan oching"));
+  return fetch(API_URL, { method: 'POST', body: JSON.stringify({ init: INIT, metod, a: a || {} }) })
+    .then(r => { if (!r.ok) throw new Error('Server javob bermadi (' + r.status + ')'); return r.json(); })
+    .then(j => { if (!j.ok) throw new Error(j.xato); return j.r; })
+    .catch(e => { throw new Error(/Failed to fetch|NetworkError|Load failed/i.test(e.message) ? "Internet yoki server bilan aloqa yo'q — qayta urinib ko'ring" : e.message); });
+}
+function chiz(r) {
+  document.getElementById('sub').textContent = (r.davr === 'hafta' ? 'Haftalik · ' : 'Kunlik · ') + r.sana + ' · yangilandi ' + r.yangilandi;
+  let h = '';
+  if (r.ogoh && r.ogoh.length) h += '<div class="kt ogoh"><h4>🎯 Nima qilish kerak</h4><ol>' + r.ogoh.slice(0, 5).map(x => '<li>' + esc(x) + '</li>').join('') + '</ol></div>';
+  if (r.kpi && r.kpi.length) h += '<div class="g2">' + r.kpi.map(k => '<div class="k"><small>' + esc(k.n) + '</small><b>' + esc(k.q) + '</b>' + (k.d ? '<i class="' + dcl(k.d) + '">' + esc(k.d) + '</i>' : '') + (k.b ? '<i>' + esc(k.b) + '</i>' : '') + '</div>').join('') + '</div>';
+  (r.bloklar || []).forEach(b => { h += '<div class="kt"><h4>' + esc(b.nom) + '</h4>' + (b.qator || []).map(q => '<p>' + xavf(q) + '</p>').join('') + '</div>'; });
+  h += '<div class="kichik">Ma\'lumot MoySklad, TASS, CM BAZA va KONTENT jadvallaridan o\'qiladi</div>';
+  E.innerHTML = h;
+}
+async function yukla(yangi) {
+  E.innerHTML = '<div class="yuk">⏳ Yuklanmoqda…</div>';
+  try { chiz(await api('hisobot', { davr: DAVR, yangi: yangi ? 1 : 0 })); }
+  catch (e) { E.innerHTML = '<div class="xato">❌ ' + esc(e.message) + '</div>'; }
+}
+document.querySelectorAll('.chip').forEach(b => b.onclick = () => { DAVR = b.dataset.d; document.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b)); yukla(false); });
+document.getElementById('yan').onclick = () => yukla(true);
+yukla(false);
+</script></body></html>
