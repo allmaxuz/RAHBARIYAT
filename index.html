@@ -135,21 +135,53 @@ function chizTovar(t) {
   if (t.xato && t.xato.length) h += '<div class="wr">' + t.xato.map(esc).join('<br>') + '</div>';
   E.innerHTML = h;
 }
+const FM = 'MoySklad+TASS fayli', FC = 'CM BAZA fayli', FK = 'KONTENT fayli';
+/* kalit: [fayl, varaq, ustun sarlavhasi, qanday olinadi] */
+const SRC = {
+  sof: [FM, 'MoySklad savdo', 'Sof savdo', "kuniga 1 qator"], chek: [FM, 'MoySklad savdo', 'Chek soni', 'kuniga 1 qator'], qayt: [FM, 'MoySklad savdo', 'Qaytarish', 'kuniga 1 qator'],
+  kirgan: [FM, 'Konversiya', 'Kirgan mijozlar (TASS)', 'kuniga 1 qator (TASS kamerasi)'],
+  yozgan: [FC, 'db Kun', 'Jami', 'kuniga 1 qator'], igy: [FC, 'db Kun', 'IG yozgan', 'kuniga 1 qator'], tgy: [FC, 'db Kun', 'TG yozgan', 'kuniga 1 qator'],
+  yangi: [FC, 'db Kun', 'Yangi', 'kuniga 1 qator'], eski: [FC, 'db Kun', 'Eski', 'kuniga 1 qator'], tsms: [FC, 'db Kun', 'Target SMS', 'kuniga 1 qator'], org: [FC, 'db Kun', 'Organik', 'kuniga 1 qator'],
+  dast: [FC, 'db Kun', 'Dastafka', 'kuniga 1 qator'], dsum: [FC, 'db Kun', 'Summa (dastafka summasi)', "kuniga 1 qator, so'mda"],
+  sarf: [FK, 'Reklama', 'Sarf ($)', "kuniga ko'p qator (reklama/kampaniya) — kun bo'yicha qo'shiladi"], kor: [FK, 'Reklama', "Ko'rsatish", "kun bo'yicha qo'shiladi"],
+  qam: [FK, 'Reklama', 'Qamrov', "kun bo'yicha qo'shiladi (reklamalar qamrovi takrorlanishi mumkin — taxminiy)"], klik: [FK, 'Reklama', 'Klik', "kun bo'yicha qo'shiladi"], xabar: [FK, 'Reklama', 'Xabar yozdi', "kun bo'yicha qo'shiladi"],
+  aqam: [FK, 'Akkaunt kunlik', 'Qamrov', 'kuniga 1 qator'], akor: [FK, 'Akkaunt kunlik', "Ko'rishlar", 'kuniga 1 qator'], prof: [FK, 'Akkaunt kunlik', 'Profilga kirish', 'kuniga 1 qator'],
+  obuna: [FK, 'Savdo', "Instagram obunachi o'sishi", 'kuniga 1 qator'], reels: [FK, 'Savdo', 'Reels soni', 'kuniga 1 qator'], rkor: [FK, 'Savdo', "Reels ko'rishlari", 'kuniga 1 qator'], story: [FK, 'Savdo', 'Story soni', 'kuniga 1 qator'],
+  tsav: [FK, 'Savdo', 'Savdo summasi (Tirox karta bilan)', 'kuniga 1 qator'], tchek: [FK, 'Savdo', 'Cheklar soni (Tirox)', 'kuniga 1 qator'], tkel: [FK, 'Savdo', 'Kelgan mijozlar (Tirox)', 'kuniga 1 qator'], tyangi: [FK, 'Savdo', 'Yangi mijozlar (yangi karta)', 'kuniga 1 qator'], tqayta: [FK, 'Savdo', 'Qayta kelganlar', 'kuniga 1 qator']
+};
+const NOM = {}; Object.keys(KO).forEach(t => KO[t].forEach(x => { if (!NOM[x[0]]) NOM[x[0]] = x[1]; }));
+Object.assign(NOM, { tkel: 'Tirox: kelgan mijozlar', tqayta: 'Tirox: qayta kelganlar', igy: 'Instagram yozganlar', tgy: 'Telegram yozganlar', org: 'Organik', kor: "Reklama ko'rsatish", qam: 'Reklama qamrovi', klik: 'Klik', xabar: 'Xabar yozdi' });
+/* hisoblanadigan: kalit: formula */
+const HISOB = {
+  ochek: 'Sof savdo ÷ Cheklar', tulush: 'Tirox savdosi ÷ Sof savdo × 100', tchekUlush: 'Tirox cheklari ÷ Cheklar × 100', qaytgan: 'Tirox qayta kelganlar ÷ Tirox kelgan mijozlar × 100',
+  eskiUlush: 'Eski ÷ (Yangi + Eski) × 100', ctr: 'Klik ÷ Ko\'rsatish × 100', xabarNarx: 'Reklama sarfi ÷ Xabar yozdi', cpl: 'Reklama sarfi ÷ Target SMS', cpa: 'Reklama sarfi ÷ Dastafka soni',
+  cac: 'Reklama sarfi ÷ Yangi mijoz (taxminiy)', roas: 'Dastafka summasi ÷ (Reklama sarfi × dollar kursi)', konv: 'Cheklar ÷ TASS kirgan mijoz × 100 (faqat Ega uchun yoqilgan bo\'lsa)'
+};
+const qayerda = k => TABLAR.filter(t => KO[t[0]] && KO[t[0]].some(x => x[0] === k)).map(t => t[1]).join(', ') || "faqat hisob-kitobda";
 const QOL = [
-['Ilova nima?', "Rahbariyat uchun marketing va savdo ko'rsatkichlari. Ma'lumot MoySklad, TASS, CM BAZA va KONTENT (Meta) jadvallaridan soatiga bir marta yig'iladi. Ilova hech narsani o'zgartirmaydi — faqat o'qiydi."],
-['Davr, jami va o\'rtacha', "Tepadagi tugmalar davrni tanlaydi. Katta raqam — davr bo'yicha JAMI; ostida «kuniga o'rtacha» (jami ÷ davr kunlari). Foiz — oldingi shu uzunlikdagi davrga nisbatan o'zgarish (Shu oy / O'tgan oy uchun — oldingi oyning shuncha kuni). Yashil — yaxshi, qizil — yomon (sarf va narxlarda kamayishi yaxshi)."],
-['Sof savdo, cheklar', "MoySklad sotuv hisobotidan: sof savdo = sotuv − qaytarish. O'rtacha chek = sof savdo ÷ cheklar soni."],
-['CPL', "1 ta Target SMS narxi = reklama sarfi ($) ÷ Target SMS soni."],
-['CPA', "1 ta dastafka narxi = reklama sarfi ($) ÷ dastafka soni."],
-['CAC (taxminiy)', "1 yangi onlayn mijoz narxi = reklama sarfi ($) ÷ yangi mijoz soni (CM BAZA). Faqat reklama sarfi hisobga olinadi."],
-['ROAS', "Dastafka summasi ÷ (reklama sarfi × dollar kursi). 1 dan katta bo'lsa reklama o'zini qoplagan (tannarxsiz, taxminiy). Kurs: Markaziy bank yoki botda /kurs 12700."],
-['ROI', "Foyda tannarxga bog'liq — u bu ilovada yo'q, shuning uchun ROI hisoblanmaydi."],
-['Tirox ulushi', "Tirox karta bilan savdo ÷ sof savdo. «Qaytganlar» — karta bilan kelganlardan avval ham kelganlar ulushi."],
-['Tovar', "Hozirgi qoldiq holati (MoySklad «Xulosa», «kam qoldiq», «tovar savdo»). Davrga bog'liq emas."],
-['🤖 AI', "Savolni o'zbekcha yozing — AI tanlangan davr raqamlari asosida javob beradi. U faqat o'qiydi va maslahat beradi, kodni o'zgartira olmaydi. Kuniga cheklangan miqdor so'rov."],
-["Ma'lumot yo'q (—)", "Manba jadvalda o'sha kun yo'q yoki bo'sh. Noto'g'ri 0 ko'rsatilmaydi."]];
-function chizQol() { document.getElementById('dn').textContent = "Qo'llanma"; E.innerHTML = QOL.map(x => '<div class="card"><div class="h2">' + esc(x[0]) + '</div><div style="font-size:13px;line-height:1.45">' + esc(x[1]) + '</div></div>').join(''); }
-let CH = [];
+['Ilova nima?', "Rahbariyat uchun marketing va savdo ko'rsatkichlari. Ma'lumot uchta jadvaldan (MoySklad+TASS, CM BAZA, KONTENT) soatiga bir marta «Kunlik» varag'iga yig'iladi (07:00 dan keyin). Ilova hech narsani o'zgartirmaydi — faqat o'qiydi. Jadvaldagi ustunlar sarlavha nomi bo'yicha topiladi, tartibi o'zgarsa ham buzilmaydi."],
+['Jami, o\'rtacha, foiz', "Katta raqam — tanlangan davr bo'yicha JAMI (kunlar qo'shiladi). Ostida «kuniga o'rtacha» = jami ÷ davr kunlari (faqat qo'shiladigan ko'rsatkichlarda). Foiz — oldingi shu uzunlikdagi davrga nisbatan o'zgarish (Shu oy / O'tgan oy uchun — oldingi oyning shuncha kuni). Yashil — yaxshi, qizil — yomon (sarf va narxlarda kamayishi yaxshi). Ma'lumot bo'lmasa «—» chiqadi, 0 emas."]
+];
+function chizQol() {
+  document.getElementById('dn').textContent = "Qo'llanma — har bir raqam qayerdan olinadi";
+  let h = QOL.map(x => '<div class="card"><div class="h2">' + esc(x[0]) + '</div><div style="font-size:13px;line-height:1.45">' + esc(x[1]) + '</div></div>').join('');
+  const gr = {};
+  Object.keys(SRC).forEach(k => { const v = SRC[k], g = v[0] + ' · «' + v[1] + '» varag\'i'; (gr[g] = gr[g] || []).push(k); });
+  Object.keys(gr).forEach(g => {
+    h += '<div class="card"><div class="h2">' + esc(g) + '</div>' + gr[g].map(k => { const v = SRC[k]; return '<div style="padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px"><b>' + esc(NOM[k] || k) + '</b><div class="src">Ustun: «' + esc(v[2]) + '» · ' + esc(v[3]) + '<br>Ko\'rinadi: ' + esc(qayerda(k)) + '</div></div>'; }).join('') + '</div>';
+  });
+  h += '<div class="card"><div class="h2">Hisoblanadigan ko\'rsatkichlar</div>' + Object.keys(HISOB).map(k => '<div style="padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px"><b>' + esc(NOM[k] || k) + '</b><div class="src">' + esc(HISOB[k]) + '<br>Ko\'rinadi: ' + esc(qayerda(k)) + '</div></div>').join('') + '</div>';
+  h += '<div class="card"><div class="h2">Boshqa nuqtalar</div><div style="font-size:13px;line-height:1.5">' +
+    '<b>Kunlik sof savdo (grafik)</b> — Asosiy, Savdo: «Sof savdo» ustuni, har kun.<br>' +
+    '<b>Yangi/Eski chizig\'i</b> — Onlayn: CM BAZA «db Kun» → «Yangi», «Eski».<br>' +
+    '<b>Tovar sahifasi</b> — MoySklad+TASS fayli: «Xulosa» (jami dona, qatorlar, kam qoldiq, minus), «MoySklad kam qoldiq» (qoldiq 0, sotuv bor), «MoySklad tovar savdo» (tez tugaydigan), «MoySklad qoldiq» (minus qoldiq). Bu hozirgi holat, davrga bog\'liq emas.<br>' +
+    '<b>Dollar kursi</b> — avval botdagi /kurs (qo\'lda), bo\'lmasa Markaziy bank (cbu.uz), 6 soat keshlanadi.<br>' +
+    '<b>ROI</b> — foyda tannarxga bog\'liq, tannarx bu bazada yo\'q, shuning uchun hisoblanmaydi.<br>' +
+    '<b>🤖 AI</b> — tanlangan davr raqamlari va tovar holatiga qarab javob beradi; faqat o\'qiydi.<br>' +
+    '<b>Qo\'llanmadagi «Ko\'rinadi»</b> — ushbu ilovaning qaysi sahifa(lar)ida shu raqam turibdi.</div></div>';
+  E.innerHTML = h;
+}
+let CH = [], EGA = null, TK = null, EMSG = '';
 function chizAI() {
   document.getElementById('dn').textContent = 'AI · davr: ' + (DAVR === 'oraliq' ? dr(A0, B0) : (DAVRLAR.find(d => d[0] === DAVR) || [])[1]);
   const m = CH.map(x => '<div class="msg ' + (x.r === 'u' ? 'u' : 'a') + '">' + esc(x.t).replace(/\n/g, '<br>') + '</div>').join('') || '<div class="src">Masalan: «Nega reklama narxi oshdi?», «Qaysi tovar tugayapti?»</div>';
@@ -160,6 +192,26 @@ function chizAI() {
     chizAI(); window.scrollTo(0, document.body.scrollHeight);
   };
   document.getElementById('sn').onclick = send; q.onkeydown = e => { if (e.key === 'Enter') send(); };
+  if (EGA === null) { EGA = false; api('men').then(j => { EGA = !!j.ega; if (EGA && TAB === 'ai') chizAI(); }).catch(() => {}); }
+  if (EGA) chizEga();
+}
+function chizEga() {
+  let h = '<div class="card" id="eg"><div class="h2">🛠 Ilovani AI orqali o\'zgartirish (faqat Ega)</div><div class="src">Nimani o\'zgartirish kerakligini yozing. AI taklif qiladi, siz ko\'rasiz va tasdiqlasangiz GitHub\'ga joylanadi. Oxirgisini qaytarish mumkin.</div>';
+  if (EMSG) h += '<div class="wr" style="margin-top:8px">' + esc(EMSG) + '</div>';
+  if (TK) {
+    h += '<div style="margin-top:8px;font-size:13px"><b>Taklif:</b> ' + esc(TK.izoh) + '</div>' + TK.almashtirish.map((x, i) => '<div class="src" style="margin-top:6px">' + (i + 1) + '-o\'zgarish</div><pre style="white-space:pre-wrap;word-break:break-word;font-size:11px;background:#fee2e2;border-radius:8px;padding:8px;margin:2px 0">− ' + esc(x.eski) + '</pre><pre style="white-space:pre-wrap;word-break:break-word;font-size:11px;background:#dcfce7;border-radius:8px;padding:8px;margin:2px 0">+ ' + esc(x.yangi) + '</pre>').join('') +
+      '<div style="display:flex;gap:8px;margin-top:10px"><button id="eT" style="flex:1;height:44px;border:0;border-radius:10px;background:#22c55e;font-weight:700">✅ Tasdiqlash</button><button id="eR" style="flex:1;height:44px;border:0;border-radius:10px;background:#e5e7eb;font-weight:700">Rad etish</button></div>';
+  } else {
+    h += '<div style="display:flex;gap:8px;margin-top:8px"><input id="eQ" placeholder="Masalan: Qo\'llanmaga yangi band qo\'sh" style="flex:1;min-width:0;height:44px;border:1px solid #d4d4d8;border-radius:10px;padding:0 10px;font:inherit"><button id="eS" style="height:44px;padding:0 14px;border:0;border-radius:10px;background:#0b0b0b;color:#fff;font-weight:700">Taklif</button></div><button id="eU" style="margin-top:8px;height:38px;border:0;border-radius:10px;background:#e5e7eb;font-weight:600;padding:0 12px">↩️ Oxirgi o\'zgarishni qaytarish</button>';
+  }
+  h += '</div>';
+  E.insertAdjacentHTML('beforeend', h);
+  const bos = async (f, m) => { EMSG = '⏳ …'; chizAI(); try { await f(); } catch (e) { EMSG = '❌ ' + e.message; } chizAI(); };
+  const g = id => document.getElementById(id);
+  if (g('eS')) g('eS').onclick = () => { const v = g('eQ').value.trim(); if (v) bos(async () => { TK = await api('taklif', { matn: v }); EMSG = ''; }); };
+  if (g('eT')) g('eT').onclick = () => bos(async () => { const j = await api('tasdiq'); TK = null; EMSG = j.t; });
+  if (g('eR')) g('eR').onclick = () => bos(async () => { await api('rad'); TK = null; EMSG = ''; });
+  if (g('eU')) g('eU').onclick = () => bos(async () => { const j = await api('qaytar'); EMSG = j.t; });
 }
 async function yukla(yangi) {
   if (TAB === 'qollanma') return chizQol();
