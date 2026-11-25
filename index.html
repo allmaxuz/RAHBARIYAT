@@ -55,7 +55,7 @@ const E = document.getElementById('E');
 const API_URL = (() => { const q = new URLSearchParams(location.search); let u = q.get('api') || ''; try { if (u) localStorage.setItem('mb_api', u); else u = localStorage.getItem('mb_api') || ''; } catch (e) {} return u; })();
 const INIT = (W && W.initData) || '';
 const DAVRLAR = [['bugun', 'Bugun'], ['kecha', 'Kecha'], ['7kun', '7 kun'], ['30kun', '30 kun'], ['shuoy', 'Shu oy'], ['otganoy', "O'tgan oy"], ['oraliq', "Sana oralig'i"]];
-const TABLAR = [['asosiy', 'Asosiy'], ['savdo', 'Savdo'], ['onlayn', 'Onlayn'], ['reklama', 'Reklama'], ['kontent', 'Kontent'], ['tovar', 'Tovar'], ['mijoz', 'Mijoz'], ['ai', '🤖 AI'], ['qollanma', "📖 Qo'llanma"]];
+const TABLAR = [['asosiy', 'Asosiy'], ['savdo', 'Savdo'], ['onlayn', 'Onlayn'], ['reklama', 'Reklama'], ['kontent', 'Kontent'], ['tovar', 'Tovar'], ['mijoz', '🎴 Tirox'], ['ai', '🤖 AI'], ['qollanma', "📖 Qo'llanma"]];
 let DAVR = '7kun', TAB = 'asosiy', A0 = '', B0 = '', R = null;
 const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 /* formatlar */
@@ -79,7 +79,7 @@ const JAMI = new Set(['sof','chek','qayt','kirgan','yozgan','igy','tgy','yangi',
 const MANBA = {
   asosiy: 'Manba: MoySklad, CM BAZA, KONTENT (Meta).', savdo: 'Manba: MoySklad savdo + TASS.', onlayn: 'Manba: CM BAZA «db Kun».',
   reklama: "Manba: KONTENT «Reklama» (Meta). CPL = sarf ÷ Target SMS; CPA = sarf ÷ dastafka soni; CAC = sarf ÷ yangi mijoz soni (taxminiy). ROAS: dastafka savdosi ÷ reklama sarfi (kurs Markaziy bankdan yoki botdagi /kurs dan).",
-  kontent: 'Manba: KONTENT «Akkaunt kunlik» va «Savdo».', mijoz: 'Manba: KONTENT «Savdo» (Tirox karta) ÷ MoySklad savdo.'
+  kontent: 'Manba: KONTENT «Akkaunt kunlik» va «Savdo».', mijoz: 'Manba: KONTENT «Savdo» (Tirox karta) ÷ MoySklad savdo. Pastdagi bloklar: CM BAZA.'
 };
 function api(metod, a) {
   if (!API_URL) return Promise.reject(new Error("Ulanish manzili yo'q. Ilovani bot ichidagi «Hisobot» tugmasidan oching"));
@@ -121,9 +121,32 @@ function chizKichik(r) {
     if (y != null && e != null && y + e > 0) { const p = Math.round(y / (y + e) * 100); h += '<div class="card"><div class="h2">Yozganlar orasida eski mijoz</div><div class="st"><div style="width:' + p + '%;background:#52525b">Yangi ' + esc(F.int(y)) + '</div><div style="width:' + (100 - p) + '%;background:#16a34a">Eski ' + esc(F.int(e)) + '</div></div></div>'; }
   }
   if (TAB === 'reklama' && r.k.roas.q == null) h += '<div class="wr">ROAS hisoblanmadi: dollar kursi aniqlanmadi. Botga /kurs 12700 deb yozing.</div>';
-  if (TAB === 'mijoz') h += '<div class="nt"><b>Umumiy qayta xarid ulushi (barcha cheklar ichida) hozir jadvallarda yo\'q.</b> Tirox faqat karta bilan kelganlarni biladi. Kartasiz mijozning birinchi yoki qayta xaridini aniqlash uchun MoySklad chekida mijoz yozilgan bo\'lishi kerak.</div>';
   E.innerHTML = h;
 }
+function tiroxHtml(t) {
+  const n = v => v == null ? '—' : F.int(v), H = t.holat, kt = (v, nom, ters) => {
+    if (!v) return ''; let d = v.p != null ? '<div class="' + ((ters ? v.p < 0 : v.p > 0) ? 'up' : v.p === 0 ? 'nu' : 'dn') + '">' + (v.p > 0 ? '+' : '') + String(v.p).replace('.', ',') + '%</div>' : '<div class="nu">oldin ' + n(v.o) + '</div>';
+    return '<div class="k"><div class="kl">' + nom + '</div><div class="kv">' + n(v.q) + '</div>' + d + (r_uz(t) ? '<div class="src">kuniga o\'rtacha ' + F.d2(v.q / t.uz) + '</div>' : '') + '</div>';
+  };
+  let h = '<div class="h2" style="margin:6px 0 -4px">Tanlangan davr · Tirox (CM BAZA)</div><div class="g">' + kt(t.yangi, 'Yangi Tirox kartalar (ro\'yxatdan o\'tgan)') + kt(t.push, 'Push yuborildi') + '</div>';
+  if (H) {
+    const kk = (nom, v, iz) => '<div class="k"><div class="kl">' + nom + '</div><div class="kv">' + v + '</div>' + (iz ? '<div class="nu">' + iz + '</div>' : '') + '</div>';
+    const insta = H.kartaHolat ? Object.keys(H.kartaHolat).map(k => k + ': ' + F.int(H.kartaHolat[k])).join(' · ') : '';
+    h += '<div class="h2" style="margin:10px 0 -4px">Hozirgi holat (davrga bog\'liq emas)</div><div class="g">' +
+      kk('Jami kartalar', n(H.jami)) + kk('Jami balans', F.mln(H.balans) + " so'm", "o'rtacha " + F.int(H.jami ? H.balans / H.jami : 0)) +
+      kk('Kelgan (tashrif ≥ 1)', n(H.kelgan), 'qayta kelgan (≥ 2): ' + F.int(H.qayta) + (H.kelgan ? ' · ' + F.pct(H.qayta / H.kelgan * 100) : '')) +
+      kk('Karta o\'rnatilmagan, balansi bor', n(H.kartasiz), F.mln(H.kartasizSum) + " so'm") +
+      kk('40+ kun kelmagan', n(H.kelmagan), 'balansi ' + F.mln(H.kelmaganSum) + " so'm") +
+      kk('Balans 15 000+ va 40+ kun kelmagan', n(H.katta), F.mln(H.kattaSum) + " so'm") +
+      kk('Kuyadigan bonus · 7 kun', n(H.kuyadi7), F.mln(H.kuyadiSum7) + " so'm") + kk('Kuyadigan bonus · 30 kun', n(H.kuyadi30), F.mln(H.kuyadiSum30) + " so'm") + '</div>' +
+      '<div class="src">Karta holati: ' + esc(insta) + '</div>';
+  }
+  if (t.aloqa && Object.keys(t.aloqa).length) h += '<div class="card"><div class="h2">Aloqa natijalari (hammasi)</div>' + Object.keys(t.aloqa).sort((a, b) => t.aloqa[b] - t.aloqa[a]).map(k => '<div class="r"><span>' + esc(k) + '</span><b>' + F.int(t.aloqa[k]) + '</b></div>').join('') + '</div>';
+  h += '<div class="src">Manba: CM BAZA «db Tirox mijoz», «db Tirox push», «db Tirox». Faqat yig\'indilar, mijoz ismi/telefoni ko\'rsatilmaydi. «Balans 15 000+» va «40 kun» chegaralari mening taxminim, CM dagi «Katta balans» ro\'yxati bilan solishtiring. yangilandi ' + esc(t.yangilandi) + '</div>';
+  if (t.xato && t.xato.length) h += '<div class="wr">' + t.xato.map(esc).join('<br>') + '</div>';
+  return h;
+}
+const r_uz = t => t.uz > 1;
 function chizTovar(t) {
   const x = t.xulosa || {}, n = v => v == null ? '—' : F.int(v);
   let h = '<div class="g"><div class="k"><div class="kl">Ombordagi tovar</div><div class="kv">' + n(x.jami) + '</div><div class="nu">dona</div></div><div class="k"><div class="kl">Tovar qatorlari</div><div class="kv">' + n(x.qator) + '</div><div class="nu">nomenklatura</div></div><div class="k"><div class="kl">Kam qoldiq</div><div class="kv">' + n(x.kam) + '</div><div class="nu">ta tovar</div></div><div class="k"><div class="kl">Minus qoldiq</div><div class="kv">' + n(x.minus) + '</div><div class="dn">xato bo\'lishi mumkin</div></div></div>';
@@ -171,6 +194,16 @@ function chizQol() {
     h += '<div class="card"><div class="h2">' + esc(g) + '</div>' + gr[g].map(k => { const v = SRC[k]; return '<div style="padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px"><b>' + esc(NOM[k] || k) + '</b><div class="src">Ustun: «' + esc(v[2]) + '» · ' + esc(v[3]) + '<br>Ko\'rinadi: ' + esc(qayerda(k)) + '</div></div>'; }).join('') + '</div>';
   });
   h += '<div class="card"><div class="h2">Hisoblanadigan ko\'rsatkichlar</div>' + Object.keys(HISOB).map(k => '<div style="padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px"><b>' + esc(NOM[k] || k) + '</b><div class="src">' + esc(HISOB[k]) + '<br>Ko\'rinadi: ' + esc(qayerda(k)) + '</div></div>').join('') + '</div>';
+  h += '<div class="card"><div class="h2">🎴 Tirox bloklari · CM BAZA fayli</div><div style="font-size:13px;line-height:1.5">' +
+    '<b>Yangi kartalar</b> — «db Tirox mijoz» · «Ro\'yxatdan» sanasi tanlangan davrga tushganlar soni.<br>' +
+    '<b>Push yuborildi</b> — «db Tirox push» · «Holat» = yuborildi, «Vaqt» davrga tushganlar.<br>' +
+    '<b>Jami kartalar, jami balans</b> — «db Tirox mijoz» · «Kod» to\'la qatorlar, «Balans» ustuni yig\'indisi.<br>' +
+    '<b>Kelgan / qayta kelgan</b> — «Tashrif soni» ≥ 1 / ≥ 2.<br>' +
+    '<b>Karta o\'rnatilmagan, balansi bor</b> — «Karta» ustuni «installed» emas va «Balans» > 0.<br>' +
+    '<b>40+ kun kelmagan</b> — «Oxirgi tashrif» 40 kundan oldin. <b>Balans 15 000+</b> — shulardan balansi 15 000 va undan ko\'pi (chegara taxminiy).<br>' +
+    '<b>Kuyadigan bonus</b> — «Kuyish sanasi» bugundan 7/30 kun ichida, summa «Kuyadigan bonus» ustunidan.<br>' +
+    '<b>Aloqa natijalari</b> — «db Tirox» · «Natija» ustuni bo\'yicha sanoq.<br>' +
+    '<b>Savdo, cheklar, ulushlar</b> — yuqoridagi kartalar (KONTENT «Savdo» varag\'i), jadvalda ko\'rsatilgan.</div></div>';
   h += '<div class="card"><div class="h2">Boshqa nuqtalar</div><div style="font-size:13px;line-height:1.5">' +
     '<b>Kunlik sof savdo (grafik)</b> — Asosiy, Savdo: «Sof savdo» ustuni, har kun.<br>' +
     '<b>Yangi/Eski chizig\'i</b> — Onlayn: CM BAZA «db Kun» → «Yangi», «Eski».<br>' +
@@ -221,6 +254,7 @@ async function yukla(yangi) {
     if (TAB === 'tovar') { chizTovar(await api('tovar', { yangi: yangi ? 1 : 0 })); document.getElementById('dn').textContent = "Qoldiq: hozirgi holat"; return; }
     if (!R || R._k !== DAVR + A0 + B0 || yangi) { R = await api('hisobot', { davr: DAVR, a: A0, b: B0, yangi: yangi ? 1 : 0 }); R._k = DAVR + A0 + B0; }
     chizKichik(R);
+    if (TAB === 'mijoz') { const k = TAB; try { const t = await api('tirox', { davr: DAVR, a: A0, b: B0, yangi: yangi ? 1 : 0 }); if (TAB === k) E.insertAdjacentHTML('beforeend', tiroxHtml(t)); } catch (e) { E.insertAdjacentHTML('beforeend', '<div class="wr">Tirox (CM BAZA): ' + esc(e.message) + '</div>'); } }
   } catch (e) { E.innerHTML = '<div class="xato">❌ ' + esc(e.message) + '</div>'; }
 }
 function menyu() {
