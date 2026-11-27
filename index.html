@@ -182,7 +182,8 @@ const HISOB = {
 };
 const qayerda = k => TABLAR.filter(t => KO[t[0]] && KO[t[0]].some(x => x[0] === k)).map(t => t[1]).join(', ') || "faqat hisob-kitobda";
 const QOL = [
-['Ilova nima?', "Rahbariyat uchun marketing va savdo ko'rsatkichlari. Ma'lumot uchta jadvaldan (MoySklad+TASS, CM BAZA, KONTENT) soatiga bir marta «Kunlik» varag'iga yig'iladi (07:00 dan keyin). Ilova hech narsani o'zgartirmaydi — faqat o'qiydi. Jadvaldagi ustunlar sarlavha nomi bo'yicha topiladi, tartibi o'zgarsa ham buzilmaydi."],
+['Ilova nima?', "Rahbariyat uchun marketing va savdo ko'rsatkichlari. Hamma ma'lumot BITTA jadvalda («Marketing baza») saqlanadi: «Kunlik», «Tovar», «Tirox holat», «Tirox kunlik» varaqlari. Jadval uchta manbadan (MoySklad+TASS, CM BAZA, KONTENT) kunlik varaq har soat, tovar va Tirox har 3 soatda yig'iladi (07:00 dan keyin); ilova faqat shu jadvaldan o'qiydi. Ilova hech narsani o'zgartirmaydi — faqat o'qiydi. Jadvaldagi ustunlar sarlavha nomi bo'yicha topiladi, tartibi o'zgarsa ham buzilmaydi."],
+['Rollar', "Botda uch rol bor: Ega (hammasi, odamlarni boshqarish /odamlar, kod va ilova o'zgarishini tasdiqlash), Rahbar (hisobot, ilova, AI), Tuzatuvchi (Rahbar + o'zgarish TAKLIF qiladi, tasdiqlashni Ega qiladi). Yangi odam botga /start yozadi, Egaga so'rov boradi. Botning o'z qo'llanmasi — botdagi «📖 Qo'llanma» tugmasida."],
 ['Jami, o\'rtacha, foiz', "Katta raqam — tanlangan davr bo'yicha JAMI (kunlar qo'shiladi). Ostida «kuniga o'rtacha» = jami ÷ davr kunlari (faqat qo'shiladigan ko'rsatkichlarda). Foiz — oldingi shu uzunlikdagi davrga nisbatan o'zgarish (Shu oy / O'tgan oy uchun — oldingi oyning shuncha kuni). Yashil — yaxshi, qizil — yomon (sarf va narxlarda kamayishi yaxshi). Ma'lumot bo'lmasa «—» chiqadi, 0 emas."]
 ];
 function chizQol() {
@@ -194,7 +195,7 @@ function chizQol() {
     h += '<div class="card"><div class="h2">' + esc(g) + '</div>' + gr[g].map(k => { const v = SRC[k]; return '<div style="padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px"><b>' + esc(NOM[k] || k) + '</b><div class="src">Ustun: «' + esc(v[2]) + '» · ' + esc(v[3]) + '<br>Ko\'rinadi: ' + esc(qayerda(k)) + '</div></div>'; }).join('') + '</div>';
   });
   h += '<div class="card"><div class="h2">Hisoblanadigan ko\'rsatkichlar</div>' + Object.keys(HISOB).map(k => '<div style="padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px"><b>' + esc(NOM[k] || k) + '</b><div class="src">' + esc(HISOB[k]) + '<br>Ko\'rinadi: ' + esc(qayerda(k)) + '</div></div>').join('') + '</div>';
-  h += '<div class="card"><div class="h2">🎴 Tirox bloklari · CM BAZA fayli</div><div style="font-size:13px;line-height:1.5">' +
+  h += '<div class="card"><div class="h2">🎴 Tirox bloklari · CM BAZA fayli («Tirox holat» va «Tirox kunlik» varaqlari orqali)</div><div style="font-size:13px;line-height:1.5">' +
     '<b>Yangi kartalar</b> — «db Tirox mijoz» · «Ro\'yxatdan» sanasi tanlangan davrga tushganlar soni.<br>' +
     '<b>Push yuborildi</b> — «db Tirox push» · «Holat» = yuborildi, «Vaqt» davrga tushganlar.<br>' +
     '<b>Jami kartalar, jami balans</b> — «db Tirox mijoz» · «Kod» to\'la qatorlar, «Balans» ustuni yig\'indisi.<br>' +
