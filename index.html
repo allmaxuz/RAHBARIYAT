@@ -70,8 +70,8 @@ const F = {
 };
 /* ko'rsatkich: [kalit, nom, format, teskari(oshishi yomon), izoh] */
 const KO = {
-  asosiy: [['sof', 'Sof savdo', 'mln'], ['chek', 'Cheklar', 'int'], ['ochek', "O'rtacha chek", 'int'], ['yozgan', 'Onlayn yozganlar', 'int'], ['dsum', 'Dastafka (onlayn savdo)', 'mln'], ['sarf', 'Reklama sarfi', 'usd', 1], ['roas', 'ROAS', 'd2'], ['cac', '1 yangi mijoz (CAC)', 'usd', 1], ['tulush', 'Tirox savdo ulushi', 'pct'], ['obuna', "Obunachi o'sishi", 'int']],
-  savdo: [['sof', 'Sof savdo', 'mln'], ['chek', 'Cheklar', 'int'], ['ochek', "O'rtacha chek", 'int'], ['qayt', 'Qaytarish', 'mln', 1], ['kirgan', 'TASS kirgan mijoz', 'int'], ['konv', 'Konversiya', 'pct']],
+  asosiy: [['sof', 'Sof savdo', 'mln'], ['foyda', '📈 Yalpi foyda', 'mln'], ['marja', 'Marja', 'pct'], ['chek', 'Cheklar', 'int'], ['ochek', "O'rtacha chek", 'int'], ['yozgan', 'Onlayn yozganlar', 'int'], ['dsum', 'Dastafka (onlayn savdo)', 'mln'], ['sarf', 'Reklama sarfi', 'usd', 1], ['roas', 'ROAS', 'd2'], ['cac', '1 yangi mijoz (CAC)', 'usd', 1], ['tulush', 'Tirox savdo ulushi', 'pct'], ['obuna', "Obunachi o'sishi", 'int']],
+  savdo: [['sof', 'Sof savdo', 'mln'], ['foyda', '📈 Yalpi foyda', 'mln'], ['marja', 'Marja', 'pct'], ['tann', 'Tannarx', 'mln'], ['chek', 'Cheklar', 'int'], ['ochek', "O'rtacha chek", 'int'], ['qayt', 'Qaytarish', 'mln', 1], ['kirgan', 'TASS kirgan mijoz', 'int'], ['konv', 'Konversiya', 'pct']],
   onlayn: [['yozgan', 'Yozganlar', 'int'], ['igy', 'Instagram', 'int'], ['tgy', 'Telegram', 'int'], ['yangi', 'Yangi mijoz', 'int'], ['eski', 'Eski mijoz', 'int'], ['eskiUlush', 'Eski mijoz ulushi', 'pct'], ['tsms', 'Target SMS', 'int'], ['org', 'Organik', 'int'], ['dast', 'Dastafka soni', 'int'], ['dsum', 'Dastafka summasi', 'mln']],
   reklama: [['sarf', 'Sarf', 'usd', 1], ['kor', "Ko'rsatish", 'int'], ['qam', 'Qamrov', 'int'], ['klik', 'Klik', 'int'], ['ctr', 'CTR', 'pct'], ['xabar', 'Xabar yozdi', 'int'], ['xabarNarx', '1 xabar narxi', 'usd', 1], ['cpl', '1 Target SMS (CPL)', 'usd', 1], ['cpa', '1 dastafka (CPA)', 'usd', 1], ['cac', '1 yangi mijoz (CAC)', 'usd', 1], ['roas', 'ROAS', 'd2']],
   kontent: [['aqam', 'Akkaunt qamrovi', 'int'], ['akor', "Ko'rishlar", 'int'], ['prof', 'Profilga kirish', 'int'], ['obuna', "Obunachi o'sishi", 'int'], ['reels', 'Reels soni', 'int'], ['rkor', "Reels ko'rishlari", 'int'], ['story', 'Story soni', 'int']],
@@ -115,7 +115,7 @@ function ogoh(r) {
 function chizKichik(r) {
   document.getElementById('dn').textContent = dr(r.a, r.b) + ' · oldingi ' + dr(r.pa, r.pb) + ' bilan · yangilandi ' + r.yangilandi;
   let h = ogoh(r);
-  h += '<div class="g">' + KO[TAB].map(x => kart(r, x)).join('') + '</div><div class="src" style="margin-top:-4px">' + esc(MANBA[TAB]) + '</div>';
+  h += '<div class="g">' + KO[TAB].filter(x => r.k[x[0]]).map(x => kart(r, x)).join('') + '</div><div class="src" style="margin-top:-4px">' + esc(MANBA[TAB]) + '</div>';
   if (TAB === 'asosiy') h += qatorSeriya(r);
   if (TAB === 'savdo') h += qatorSeriya(r);
   if (TAB === 'onlayn') {
@@ -178,7 +178,7 @@ const NOM = {}; Object.keys(KO).forEach(t => KO[t].forEach(x => { if (!NOM[x[0]]
 Object.assign(NOM, { tkel: 'Tirox: kelgan mijozlar', tqayta: 'Tirox: qayta kelganlar', igy: 'Instagram yozganlar', tgy: 'Telegram yozganlar', org: 'Organik', kor: "Reklama ko'rsatish", qam: 'Reklama qamrovi', klik: 'Klik', xabar: 'Xabar yozdi' });
 /* hisoblanadigan: kalit: formula */
 const HISOB = {
-  ochek: 'Sof savdo ÷ Cheklar', tulush: 'Tirox savdosi ÷ Sof savdo × 100', tchekUlush: 'Tirox cheklari ÷ Cheklar × 100', qaytgan: 'Tirox qayta kelganlar ÷ Tirox kelgan mijozlar × 100',
+  ochek: 'Sof savdo ÷ Cheklar', foyda: 'MoySklad «Прибыльность»: savdo − tannarx − qaytarish. Ijara, maosh, reklama ayrilmagan (sof foyda emas). Faqat Ega va Rahbar ko\'radi', marja: 'Yalpi foyda ÷ Sof savdo × 100', tann: 'MoySklad: sotilgan tovarlar tannarxi', tulush: 'Tirox savdosi ÷ Sof savdo × 100', tchekUlush: 'Tirox cheklari ÷ Cheklar × 100', qaytgan: 'Tirox qayta kelganlar ÷ Tirox kelgan mijozlar × 100',
   eskiUlush: 'Eski ÷ (Yangi + Eski) × 100', ctr: 'Klik ÷ Ko\'rsatish × 100', xabarNarx: 'Reklama sarfi ÷ Xabar yozdi', cpl: 'Reklama sarfi ÷ Target SMS', cpa: 'Reklama sarfi ÷ Dastafka soni',
   cac: 'Reklama sarfi ÷ Yangi mijoz (taxminiy)', roas: 'Dastafka summasi ÷ (Reklama sarfi × dollar kursi)', konv: 'Cheklar ÷ TASS kirgan mijoz × 100 (faqat Ega uchun yoqilgan bo\'lsa)'
 };
