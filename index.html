@@ -40,6 +40,7 @@ body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-ser
 #sh div{background:#fff;width:100%;border-radius:16px 16px 0 0;padding:18px 16px 24px;display:flex;flex-direction:column;gap:10px}
 #sh input{width:100%;min-width:0;height:44px;border:1px solid #d4d4d8;border-radius:10px;padding:0 10px;font:inherit;accent-color:#16a34a}
 #sh button{height:46px;border:0;border-radius:12px;font:inherit;font-weight:700;background:#22c55e;color:#0b0b0b}
+#qm{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;flex-direction:column;justify-content:flex-end;z-index:40}#qm.on{display:flex}#qm .qb{background:#fff;border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:88vh;display:flex;flex-direction:column;gap:10px}#qm h3{margin:0;font-size:16px}#qm .qs{overflow-y:auto;display:flex;flex-direction:column;gap:6px}#qm .qr{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:9px 11px;border-radius:10px;background:#f3f4f2}#qm .qr.w{background:#fef3c7;color:#92400e}#qm .qr b{white-space:nowrap}#qm button{height:48px;border:0;border-radius:12px;font:inherit;font-weight:700;font-size:15px;background:#22c55e;color:#0b0b0b}
 </style></head><body>
 <div class="h" id="H">
  <div class="row1"><div><div class="t">ALLMAX FIX PRICE</div><b>MARKETING BAZA</b></div><button id="yan">🔄</button></div>
@@ -49,6 +50,7 @@ body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-ser
 <div class="tabs" id="T"></div>
 <div id="E"><div class="yuk">⏳ Yuklanmoqda…</div></div>
 <div id="sh"><div><b>Sana oralig'i</b><label class="src">Boshlanishi</label><input type="date" id="d1"><label class="src">Tugashi</label><input type="date" id="d2"><button id="ok">Ko'rsatish</button><button id="yop" style="background:#e5e7eb">Bekor</button></div></div>
+<div id="qm"><div class="qb"><h3>📅 Ma'lumot qaysi sanadan boshlanadi</h3><div class="qs" id="qs">⏳ Yuklanmoqda…</div><div class="src">Sanadan oldingi kunlar hisobotga kirmaydi — davr shundan oldin boshlansa, raqam to'liq bo'lmaydi.</div><button id="qok">OK</button></div></div>
 <script>
 const W = window.Telegram && Telegram.WebApp; try { W && (W.ready(), W.expand()); } catch (e) {}
 const E = document.getElementById('E');
@@ -272,5 +274,13 @@ document.getElementById('ok').onclick = () => {
   if (!a || !b) return;
   DAVR = 'oraliq'; A0 = a; B0 = b; document.getElementById('sh').classList.remove('on'); menyu(); yukla(false);
 };
-menyu(); yukla(false);
+function boshla() { menyu(); yukla(false); }
+(function qamrovOyna() {
+  const q = document.getElementById('qm'), s = document.getElementById('qs'); q.classList.add('on');
+  const fmt = d => d ? d.split('-').reverse().join('.') : '—';
+  document.getElementById('qok').onclick = () => { q.classList.remove('on'); boshla(); };
+  api('qamrov').then(r => {
+    s.innerHTML = r.royxat.map(g => { const kech = g.a && g.a > '2026-10-01'; return '<div class="qr' + (kech ? ' w' : '') + '"><span>' + g.n + '</span><b>' + fmt(g.a) + ' dan</b></div>'; }).join('') + '<div class="src" style="margin-top:4px">Oxirgi yangilangan kun: ' + fmt(r.bugun) + '</div>';
+  }).catch(() => { q.classList.remove('on'); boshla(); });
+})();
 </script></body></html>
